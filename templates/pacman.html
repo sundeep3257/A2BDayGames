@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .game-stats {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 500px;
+    }
+    
+    .food-progress {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--accent-pink);
+        text-shadow: 0 0 10px var(--accent-pink);
+    }
+    
+    .power-up-display {
+        font-size: 1rem;
+        color: var(--accent-yellow);
+        text-shadow: 0 0 10px var(--accent-yellow);
+        min-height: 1.5rem;
+    }
+    
+    #gameCanvas {
+        border: 3px solid var(--accent-cyan);
+        border-radius: 8px;
+        box-shadow: 0 0 20px var(--accent-cyan);
+        background: var(--bg-dark);
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .controls-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .dpad-row {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    
+    .dpad-button {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        border: 2px solid var(--accent-yellow);
+        background: var(--bg-light);
+        color: var(--accent-yellow);
+        border-radius: 8px;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 0 10px var(--accent-yellow);
+        transition: all 0.2s;
+    }
+    
+    .dpad-button:active {
+        transform: scale(0.95);
+        box-shadow: 0 0 5px var(--accent-yellow);
+    }
+    
+    .game-over-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        color: var(--accent-pink);
+        font-size: 2rem;
+        text-align: center;
+    }
+    
+    .game-over-overlay.active {
+        display: flex;
+    }
+    
+    .game-over-text {
+        text-shadow: 0 0 20px var(--accent-pink);
+        margin-bottom: 1rem;
+    }
+    
+    .restart-button {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--bg-dark);
+        background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 0 20px var(--accent-pink);
+        margin-top: 1rem;
+    }
+    
+    .restart-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 30px var(--accent-pink);
+    }
+    
+    .win-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        color: var(--accent-yellow);
+        font-size: 2rem;
+        text-align: center;
+    }
+    
+    .win-overlay.active {
+        display: flex;
+    }
+    
+    .win-text {
+        text-shadow: 0 0 20px var(--accent-yellow);
+        margin-bottom: 1rem;
+    }
+    
+    .home-button {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--bg-dark);
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-yellow));
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 0 20px var(--accent-cyan);
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+    
+    .home-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 30px var(--accent-cyan);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="game-stats">
+        <div class="food-progress">Food: <span id="foodProgress">0%</span></div>
+        <div class="power-up-display" id="powerUpDisplay"></div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls-container">
+        <div class="dpad-row">
+            <button class="dpad-button" id="btnUp" aria-label="Up">↑</button>
+        </div>
+        <div class="dpad-row">
+            <button class="dpad-button" id="btnLeft" aria-label="Left">←</button>
+            <button class="dpad-button" id="btnDown" aria-label="Down">↓</button>
+            <button class="dpad-button" id="btnRight" aria-label="Right">→</button>
+        </div>
+    </div>
+</div>
+
+<div class="game-over-overlay" id="gameOverOverlay">
+    <div class="game-over-text">Game Over!</div>
+    <button class="restart-button" id="restartButton">Restart</button>
+    <a href="{{ url_for('index') }}" class="home-button">Home</a>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+    <div class="win-text">You Win!</div>
+    <button class="restart-button" id="winRestartButton">Play Again</button>
+    <a href="{{ url_for('index') }}" class="home-button">Home</a>
+</div>
+
+<script>
+    // Store character in sessionStorage
+    sessionStorage.setItem('selectedCharacter', '{{ character }}');
+</script>
+<script src="{{ url_for('static', filename='js/pacman.js') }}"></script>
+{% endblock %}
