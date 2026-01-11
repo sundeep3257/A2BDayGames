@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="homepage-container">
+    <div class="selection-card">
+        <h2>Choose Your Character</h2>
+        <form id="game-form" method="POST" action="{{ url_for('play') }}">
+            <div class="character-selection">
+                <label class="character-option">
+                    <input type="radio" name="character" value="Armando" required>
+                    <div class="character-card">
+                        <img src="{{ url_for('static', filename='graphics/Armando_head.png') }}" alt="Armando">
+                        <span>Armando</span>
+                    </div>
+                </label>
+                <label class="character-option">
+                    <input type="radio" name="character" value="Ananya" required>
+                    <div class="character-card">
+                        <img src="{{ url_for('static', filename='graphics/Ananya_head.png') }}" alt="Ananya">
+                        <span>Ananya</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div class="game-selection">
+                <h2>Choose Your Game</h2>
+                <div class="game-options">
+                    <label class="game-option active">
+                        <input type="radio" name="game" value="snake" checked required>
+                        <div class="game-card">
+                            <span class="game-icon">🐍</span>
+                            <span class="game-name">Snake</span>
+                        </div>
+                    </label>
+                    <label class="game-option active">
+                        <input type="radio" name="game" value="pacman">
+                        <div class="game-card">
+                            <span class="game-icon">👻</span>
+                            <span class="game-name">Pac-Man</span>
+                        </div>
+                    </label>
+                    <label class="game-option active">
+                        <input type="radio" name="game" value="pinball">
+                        <div class="game-card">
+                            <span class="game-icon">🎱</span>
+                            <span class="game-name">Pinball</span>
+                        </div>
+                    </label>
+                    <label class="game-option active">
+                        <input type="radio" name="game" value="asteroids">
+                        <div class="game-card">
+                            <span class="game-icon">☄️</span>
+                            <span class="game-name">Asteroids</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="play-button">Play!</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
