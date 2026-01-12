@@ -283,6 +283,7 @@ footer {
 
 .footer-text {
     color: #ffffff;
-    font-size: 0.875rem; /* Increased by 2 points (from 0.75rem) */
+    font-size: 1.00rem; /* Increased by 3 points (from 0.75rem) */
     margin: 0;
 }
+
